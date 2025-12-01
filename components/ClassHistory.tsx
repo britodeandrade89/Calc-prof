@@ -1,16 +1,23 @@
-import React from 'react';
-import { History, Trash2, Calculator } from 'lucide-react';
+import React, { useState } from 'react';
+import { History, Trash2, Calculator, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 import { StudentGrade } from '../types';
 
 interface ClassHistoryProps {
   savedGrades: StudentGrade[];
   onClearHistory: () => void;
+  turmaName?: string;
 }
 
 export const ClassHistory: React.FC<ClassHistoryProps> = ({
   savedGrades,
   onClearHistory,
+  turmaName = "Turma",
 }) => {
+  const [analysis, setAnalysis] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [aiError, setAiError] = useState<string>('');
+
   const calculateAverage = () => {
     if (savedGrades.length === 0) return 0;
     const total = savedGrades.reduce((acc, curr) => acc + curr.total, 0);
@@ -20,6 +27,50 @@ export const ClassHistory: React.FC<ClassHistoryProps> = ({
   const confirmClear = () => {
     if (window.confirm('Tem certeza que deseja apagar todo o histórico da turma?')) {
       onClearHistory();
+      setAnalysis('');
+      setAiError('');
+    }
+  };
+
+  const handleGenerateAnalysis = async () => {
+    if (savedGrades.length === 0) return;
+
+    setIsAnalyzing(true);
+    setAiError('');
+    setAnalysis('');
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      
+      const gradesSummary = savedGrades.map(g => ({
+        nome: g.studentName || "Aluno Anônimo",
+        nota: g.total
+      }));
+
+      const average = calculateAverage().toFixed(1);
+      const prompt = `
+        Atue como um coordenador pedagógico experiente.
+        Analise os dados desta turma: "${turmaName}".
+        Média da turma: ${average}.
+        Total de alunos: ${savedGrades.length}.
+        Lista de notas: ${JSON.stringify(gradesSummary)}.
+
+        Forneça um "Resumo Pedagógico" breve (máximo 3 frases) sobre o desempenho geral da turma. 
+        Seja construtivo e destaque se o desempenho está acima, na média ou abaixo do esperado, sugerindo um ponto de atenção se necessário.
+        Não use markdown ou formatação complexa, apenas texto corrido.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+
+      setAnalysis(response.text || 'Não foi possível gerar a análise.');
+    } catch (error) {
+      console.error("Erro na análise IA:", error);
+      setAiError('Falha ao conectar com a IA. Verifique sua chave API.');
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -93,16 +144,56 @@ export const ClassHistory: React.FC<ClassHistoryProps> = ({
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center text-sm text-slate-400">
-        <span>Média da Turma:</span>
-        <span className="text-white font-bold">
-          {savedGrades.length > 0
-            ? calculateAverage().toLocaleString('pt-BR', {
-                maximumFractionDigits: 1,
-              })
-            : '-'}
-        </span>
-      </div>
+      {/* AI Analysis Section */}
+      {savedGrades.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-slate-700">
+            {aiError && (
+                <div className="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-xs text-red-300">
+                    <AlertCircle size={14} />
+                    {aiError}
+                </div>
+            )}
+            
+            {analysis && (
+                <div className="mb-4 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold mb-1 uppercase tracking-wide">
+                        <Sparkles size={12} />
+                        Análise IA
+                    </div>
+                    <p className="text-sm text-indigo-100 leading-relaxed italic">
+                        "{analysis}"
+                    </p>
+                </div>
+            )}
+
+            <div className="flex justify-between items-center text-sm text-slate-400 mb-3">
+                <span>Média da Turma:</span>
+                <span className="text-white font-bold">
+                {calculateAverage().toLocaleString('pt-BR', {
+                    maximumFractionDigits: 1,
+                })}
+                </span>
+            </div>
+
+            <button
+                onClick={handleGenerateAnalysis}
+                disabled={isAnalyzing}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-white text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg shadow-indigo-900/20 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+                {isAnalyzing ? (
+                    <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Analisando...
+                    </>
+                ) : (
+                    <>
+                        <Sparkles size={16} />
+                        Gerar Análise Pedagógica
+                    </>
+                )}
+            </button>
+        </div>
+      )}
     </div>
   );
 };

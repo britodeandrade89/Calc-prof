@@ -45,7 +45,8 @@ export default function App() {
         {/* RIGHT SIDE: HISTORY */}
         <ClassHistory 
           savedGrades={savedGrades} 
-          onClearHistory={handleClearHistory} 
+          onClearHistory={handleClearHistory}
+          turmaName={turma}
         />
 
       </div>
