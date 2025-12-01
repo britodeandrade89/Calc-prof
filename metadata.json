@@ -1,0 +1,5 @@
+{
+  "name": "Calculadora de Professores",
+  "description": "A rapid grade calculation tool for teachers to sum scores and track class averages efficiently.",
+  "requestFramePermissions": []
+}
