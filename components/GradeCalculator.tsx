@@ -191,7 +191,7 @@ export const GradeCalculator: React.FC<GradeCalculatorProps> = ({
       >
         <input
           ref={inputRef}
-          type="number"
+          type="text"
           inputMode="decimal"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

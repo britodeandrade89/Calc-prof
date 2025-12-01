@@ -19,7 +19,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
       {/* Header / Logo Section */}
-      <div className="max-w-4xl mx-auto mb-8 flex items-center gap-4">
+      <div className="max-w-4xl mx-auto mb-4 md:mb-8 flex items-center gap-4">
         <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-600/20 text-white transform rotate-3">
           <GraduationCap size={32} strokeWidth={2.5} />
         </div>
