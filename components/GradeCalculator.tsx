@@ -82,6 +82,7 @@ export const GradeCalculator: React.FC<GradeCalculatorProps> = ({
     onSaveStudent(newGrade);
     
     // Check if user was using name input to decide focus for next turn
+    // If they typed a name, we assume the next entry also starts with a name
     const wasUsingName = studentName.trim().length > 0;
     resetCurrent(wasUsingName);
   };
@@ -127,35 +128,34 @@ export const GradeCalculator: React.FC<GradeCalculatorProps> = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col h-full border border-slate-200">
-      {/* Inputs Header */}
-      <div className="flex flex-col gap-4 mb-6">
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-            Turma / Disciplina
-          </label>
-          <input
-            type="text"
-            value={turma}
-            onChange={(e) => setTurma(e.target.value)}
-            placeholder="Ex: 8º Ano B"
-            className="w-full text-lg font-semibold text-slate-700 placeholder-slate-300 border-b-2 border-slate-200 focus:border-blue-500 outline-none transition-colors bg-transparent pb-1"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-            Nome do Aluno <span className="text-slate-300 font-normal normal-case">(Opcional)</span>
-          </label>
-          <input
-            ref={studentNameRef}
-            type="text"
-            value={studentName}
-            onChange={(e) => setStudentName(e.target.value)}
-            onKeyDown={handleNameKeyDown}
-            placeholder="Ex: João Silva"
-            className="w-full text-lg text-slate-700 placeholder-slate-300 border-b-2 border-slate-200 focus:border-blue-500 outline-none transition-colors bg-transparent pb-1"
-          />
-        </div>
+      {/* Session Header */}
+      <div className="mb-4">
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+          Turma / Disciplina
+        </label>
+        <input
+          type="text"
+          value={turma}
+          onChange={(e) => setTurma(e.target.value)}
+          placeholder="Ex: 8º Ano B"
+          className="w-full text-lg font-semibold text-slate-700 placeholder-slate-300 border-b-2 border-slate-200 focus:border-blue-500 outline-none transition-colors bg-transparent pb-1"
+        />
+      </div>
+      
+      {/* Student Name Input */}
+      <div className="mb-6">
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+          Nome do Aluno <span className="text-slate-300 font-normal normal-case">(Opcional)</span>
+        </label>
+        <input
+          ref={studentNameRef}
+          type="text"
+          value={studentName}
+          onChange={(e) => setStudentName(e.target.value)}
+          onKeyDown={handleNameKeyDown}
+          placeholder="Ex: João Silva"
+          className="w-full text-lg text-slate-700 placeholder-slate-300 border-b-2 border-slate-200 focus:border-blue-500 outline-none transition-colors bg-transparent pb-1"
+        />
       </div>
 
       {/* Main Display */}
